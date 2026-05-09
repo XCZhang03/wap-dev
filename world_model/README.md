@@ -11,10 +11,10 @@ cd world_model
 ```
 
 ### 1. Create and activate a Python environment
-
+We create a separate environment for the world model since we inference using websocket client
 ```bash
-mamba create -n wap_env python=3.11 -y
-mamba activate wap_env
+mamba create -n ei_world_model python=3.11 -y
+mamba activate ei_world_model
 ```
 
 ### 2. Install project dependencies
@@ -84,7 +84,7 @@ huggingface-cli download Wan-AI/Wan2.1-I2V-14B-480P \
   --local-dir data/ckpts/Wan2.1-I2V-14B-480P \
   --local-dir-use-symlinks False
 ```
-
+For training from the original T2V checkpoint, you should also download the Wan-T2V-1.3B checkpoint
 ## Run the World Model Server
 
 Start with the default released checkpoint:
