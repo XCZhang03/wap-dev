@@ -6,7 +6,7 @@ This repository hosts the action-conditioned world models used in the **World Ac
 
 ## Setup
 
-### 1. Create and activate the shared mamba environment
+### 1. Create and activate the mamba environment for simulators and planning
 
 ```bash
 mamba create -n wap_env python=3.11 -y
@@ -32,7 +32,7 @@ pip install -e wm_client
 ### 4. Set up the world model
 
 Follow the full setup guide in [`world_model/README.md`](world_model/README.md), including:
-- editable install for `world_model`
+- editable install for `world_model` in a separate env
 - checkpoint download
 - Wan base file download
 - server startup
