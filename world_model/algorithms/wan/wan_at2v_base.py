@@ -325,7 +325,7 @@ class WanActionTextToVideoBase(WanTextToVideo):
             Sliced copy of the batch.
         """
         sliced_batch = {}
-        tensor_keys = ['videos', 'conds', 'camera_poses', 'low_dim_conds']
+        tensor_keys = ['videos', 'conds']
         for key, value in batch.items():
             if key in tensor_keys:
                 sliced_batch[key] = value[:, start_frame:end_frame].clone()

@@ -32,7 +32,7 @@ class CondVideoDataset(VideoDataset):
 
     def load_record(self, record: Dict[str, Any]) -> Dict[str, Any]:
         # Load video data - either raw or preprocessed latents
-        videos, conds, low_dim_conds, camera_poses = self._load_video_cond(record)
+        videos, conds = self._load_video_cond(record)
         # images = videos[:1].clone() if self.image_to_video else None
         image_latents, video_latents = None, None
         video_metadata = {
@@ -57,8 +57,6 @@ class CondVideoDataset(VideoDataset):
         output = {
             "videos": videos,
             "conds": conds,
-            # "low_dim_conds": low_dim_conds,
-            # "camera_poses": camera_poses,
             "video_metadata": video_metadata,
             "bbox_render": bbox_render,
             "has_bbox": has_bbox,
@@ -109,10 +107,8 @@ class CondVideoDataset(VideoDataset):
 
         video_path = self.data_root / record["video_path"]
         cond_path = self.data_root / record['cond_path']
-        # low_dim_path = self.data_root / record['low_dim_path']
         video_reader = decord.VideoReader(uri=video_path.as_posix())
         cond_reader = decord.VideoReader(uri=cond_path.as_posix())
-        # low_dim_cond_reader = np.load(low_dim_path.as_posix(), allow_pickle=True)
 
         n_frames = len(video_reader)
         assert n_frames == len(cond_reader), "Video and cond length mismatch"
@@ -122,10 +118,7 @@ class CondVideoDataset(VideoDataset):
         indices = list(start + indices)
         frames = video_reader.get_batch(indices)
         cond_frames = cond_reader.get_batch(indices)
-        # low_dim_conds = self.pad_actions(torch.from_numpy(low_dim_cond_reader['actions'][indices]).float()).contiguous()
-        # camera_poses = self.load_camera_pose(low_dim_cond_reader)[indices]  # (n_frames, num_cams, pose_dim)
-        low_dim_conds = None
-        camera_poses = None
+
         # do some padding
         if len(frames) != self.n_frames:
             raise ValueError(
@@ -151,57 +144,7 @@ class CondVideoDataset(VideoDataset):
         frames = self.img_normalize(frames)
         cond_frames = self.img_normalize(cond_frames)
 
-        return frames, cond_frames, low_dim_conds, camera_poses
-
-    def load_camera_pose(self, low_dim_cond_reader):
-        def pose2vec(intrinsics, extrinsics):
-            '''
-            Docstring for pose2vec
-            
-            :param intrinsics: 3x3 intrinsics matrix
-            :param extrinsics: 3x4 extrinsics matrix
-            '''
-            # intrinsics
-            fx = intrinsics[0, 0]
-            fy = intrinsics[1, 1]
-            px = intrinsics[0, 2]
-            py = intrinsics[1, 2]
-            W = px * 2
-            H = py * 2
-            intrinsics_vec = torch.tensor([fx / W, fy / H, px / W, py / H])
-            # extrinsics
-            RT = rearrange(torch.tensor(extrinsics)[:3], 'i j -> (i j)', i=3, j=4)
-
-            # concat
-            pose = torch.cat([intrinsics_vec, RT], dim=0)
-
-            # # DEBUG
-            # from utils.geometry_utils import CameraPose
-            # cam_pose = CameraPose.from_vectors(pose.unsqueeze(0).unsqueeze(0))
-            # extrinsics_debug = cam_pose.extrinsics().numpy()
-            # intrinsics_debug = cam_pose.intrinsics().numpy() * np.array([[W], [H], [1]])
-            # assert np.allclose(intrinsics_debug, intrinsics)
-            # assert np.allclose(extrinsics_debug, extrinsics[:3])
-
-            return pose
-            
-        camera_names = low_dim_cond_reader['panel_order']
-        camera_poses = {cam_name: [] for cam_name in camera_names}
-        for cam_pose in low_dim_cond_reader['camera_poses']:
-            for cam_name in camera_names:
-                intrinsics = cam_pose[cam_name]['intrinsics']
-                extrinsics = cam_pose[cam_name]['extrinsics']
-                pose_vec = pose2vec(intrinsics, extrinsics)
-                camera_poses[cam_name].append(pose_vec)
-        for cam_name in camera_names:
-            camera_poses[cam_name] = torch.stack(camera_poses[cam_name], dim=0)
-
-        return torch.stack([camera_poses[cam_name] for cam_name in camera_names], dim=1)  # (num_frames, num_cams, pose_dim)
-
-        
-        
-
-    
+        return frames, cond_frames
 
 
     def download(self):
