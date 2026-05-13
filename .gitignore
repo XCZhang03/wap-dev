@@ -12,3 +12,5 @@ outputs
 huggingface
 
 *.egg-info/
+*.ckpt
+*.npz
