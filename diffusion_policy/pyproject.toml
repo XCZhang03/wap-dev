@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diffusion_policy"
+version = "0.1.0"
+description = "Diffusion Policy: Visuomotor Policy Learning via Action Diffusion"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Cheng Chi", email = "cheng@chengineer.com"},
+    {name = "Siyuan Feng"},
+    {name = "Yilun Du"},
+    {name = "Zhenjia Xu"},
+    {name = "Eric Cousieau"},
+    {name = "Benjamin Burchfiel"},
+    {name = "Shuran Song"},
+]
+dependencies = [
+   
+]
+
+[project.urls]
+Homepage = "https://github.com/real-stanford/diffusion_policy"
+Repository = "https://github.com/real-stanford/diffusion_policy"
+
+[tool.setuptools]
+packages = ["diffusion_policy"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+"diffusion_policy" = ["**/*"]
+
+[tool.setuptools.package-dir]
+"" = "."
